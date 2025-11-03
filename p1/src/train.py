@@ -33,6 +33,8 @@ from model import GPTConfig, GPT
 import torch._dynamo.config
 torch._dynamo.config.suppress_errors = True
 
+import matplotlib.pyplot as plt
+
 student_id = 123456 # change to your student id
 
 # -----------------------------------------------------------------------------
