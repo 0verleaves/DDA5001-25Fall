@@ -4,6 +4,7 @@ Sample from a trained model
 import os
 import pickle
 from contextlib import nullcontext
+from datetime import datetime
 import torch
 import tiktoken
 from model import GPTConfig, GPT
@@ -82,9 +83,25 @@ start_ids = encode(start)
 x = (torch.tensor(start_ids, dtype=torch.long, device=device)[None, ...])
 
 # run generation
+os.makedirs(out_dir, exist_ok=True)
+outfile = os.path.join(
+    out_dir, f"samples_{student_id}_{datetime.now().strftime('%Y%m%d-%H%M%S')}.txt"
+)
+
 with torch.no_grad():
     with ctx:
-        for k in range(num_samples):
-            y = model.generate(x, max_new_tokens, temperature=temperature, top_k=top_k)
-            print(decode(y[0].tolist()))
-            print('---------------')
+        with open(outfile, "w", encoding="utf-8") as fh:
+            for k in range(num_samples):
+                y = model.generate(x, max_new_tokens, temperature=temperature, top_k=top_k)
+                txt = decode(y[0].tolist())
+
+                # print to console
+                print(txt)
+                print('---------------')
+
+                # write to file (keep a clear separator between samples)
+                fh.write(f"===== sample {k+1}/{num_samples} =====\n")
+                fh.write(txt)
+                fh.write("\n---------------\n")
+
+print(f"Samples saved to: {outfile}")
